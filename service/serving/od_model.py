@@ -19,13 +19,15 @@ class ODModel:
 
         self.class_mapping = {item['model_idx']: item['class_name'] for item in mappings}
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        if self.device == 'cpu':
+        if not torch.cuda.is_available():
             logging.warning("GPU not found")
         model = torch.jit.load(os.path.join(model_path, 'model.pt'))
         self.model = model.to(self.device)
         logging.info(f"Model {model_path} loaded")
 
     def predict(self, image: Image):
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
         width, height = image.width, image.height
         image = np.array(image)
         image = self.transforms(image=image)['image']
