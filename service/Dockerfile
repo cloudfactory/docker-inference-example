@@ -14,4 +14,4 @@ WORKDIR /inference
 COPY service/main.py .
 
 
-ENTRYPOINT ["python3", "main.py", "--model_name", "od_model_v0"]
+ENTRYPOINT ["python3", "main.py", "--model_name", "od_model_v0", "--cls_model_name", "cls_model_v2"]

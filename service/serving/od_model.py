@@ -26,8 +26,6 @@ class ODModel:
         logging.info(f"Model {model_path} loaded")
 
     def predict(self, image: Image):
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
         width, height = image.width, image.height
         image = np.array(image)
         image = self.transforms(image=image)['image']
