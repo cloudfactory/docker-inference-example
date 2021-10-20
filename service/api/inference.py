@@ -22,7 +22,7 @@ def get_object_detection_prediction(model_name, image_b64=None, image_url=None,
     if image.mode != 'RGB':
         image = image.convert('RGB')
     predictions = model.predict(image)
-    if cls_model_name:
+    if cls_model_name and len(predictions) > 0:
         cls_model = models_registry[cls_model_name]
         img_list = [np.array(image.crop(p["bbox"])) for p in predictions]
         cls_predictions = cls_model.predict(img_list)
