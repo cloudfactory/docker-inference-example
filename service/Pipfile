@@ -9,7 +9,8 @@ verify_ssl = true
 Flask = "==1.1.2"
 Flask-Uploads = "==0.2.1"
 flask-swagger = "==0.2.14"
-requests = "==2.22.0"
+omegaconf = "==2.1.1"
+requests = "==2.25.1"
 waitress = "==2.0.0"
 
 [requires]

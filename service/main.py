@@ -9,6 +9,8 @@ from flask import Flask
 from service.endpoints.inference import inference_api
 from service.serving.registry import models_registry
 
+C_MODEL_FOLDER = "model"
+
 # Set up logger
 log_format = "%(levelname)s %(asctime)s - %(message)s"
 logging.basicConfig(stream=sys.stdout,
@@ -20,13 +22,10 @@ app = Flask('Inference Service')
 app.register_blueprint(inference_api)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Train model')
-    parser.add_argument("--model_name", help="Model name")
-    parser.add_argument("--cls_model_name", help="Classifiers model name")
-    args = parser.parse_args()
-    model_name = args.model_name
-    cls_model_name = args.cls_model_name
-    # TODO Only one OD is supported right now
-    models_registry.load_model("detector", os.path.join('model', model_name), model_name)
-    models_registry.load_model("classifier", os.path.join('model', cls_model_name), cls_model_name)
+    for model_name in os.listdir(C_MODEL_FOLDER):
+        model_path = os.path.join(C_MODEL_FOLDER, model_name)
+        if os.path.isdir(model_path):
+            model_family = models_registry.get_model_family(model_path)
+            if model_family:
+                models_registry.load_model(model_family, model_path, model_name)
     waitress.serve(app, host='0.0.0.0', port='5000', threads=8)
