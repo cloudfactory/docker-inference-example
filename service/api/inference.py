@@ -10,7 +10,7 @@ from service.serving.registry import models_registry
 
 
 def get_object_detection_prediction(model_name, image_b64=None, image_url=None,
-                                    confidence_thresh=0.5, cls_model_name=None):
+                                    confidence_thresh=0.5, cls_model_name=None, attr_model_name=None):
     model = models_registry[model_name]
     image = None
     if image_b64:
@@ -30,4 +30,10 @@ def get_object_detection_prediction(model_name, image_b64=None, image_url=None,
             pred["cls_score"] = cls_predictions[i]["cls_score"]
             pred["class_idx"] = cls_predictions[i]["class_idx"]
             pred["class_name"] = cls_predictions[i]["class_name"]
+    if attr_model_name and len(predictions) > 0:
+        attr_model = models_registry[attr_model_name]
+        img_list = [np.array(image.crop(p["bbox"])) for p in predictions]
+        attr_predictions = attr_model.predict(img_list)
+        for i, pred in enumerate(predictions):
+            pred["attributes"] = attr_predictions[i]["attributes"]
     return predictions

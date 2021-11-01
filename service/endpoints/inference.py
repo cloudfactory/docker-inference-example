@@ -18,6 +18,7 @@ def get_object_detection_prediction():
         raise ValueError("Image url or base64 should be provided")
     model = request.json.get('model', None)
     cls_model_name = request.json.get('cls_model_name', None)
+    attr_model_name = request.json.get('attr_model_name', None)
     results = api.inference.get_object_detection_prediction(model, image_b64, image_url, confidence_thresh,
-                                                            cls_model_name)
+                                                            cls_model_name, attr_model_name)
     return api.base.get_json_response(results)
