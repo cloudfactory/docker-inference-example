@@ -3,6 +3,7 @@ import os
 
 from omegaconf import OmegaConf
 
+from .attr_model import ATTRModel
 from .cls_model import CLSModel
 from .od_model import ODModel
 
@@ -17,6 +18,8 @@ class ModelRegistry:
             self.loaded_models[model_name] = ODModel(model_path)
         elif model_family == "classifier":
             self.loaded_models[model_name] = CLSModel(model_path)
+        elif model_family == "attributer":
+            self.loaded_models[model_name] = ATTRModel(model_path)
         else:
             raise ValueError(f"Unsupported model family - {model_family}")
 
