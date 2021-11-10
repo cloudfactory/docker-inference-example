@@ -13,9 +13,11 @@ C_MODEL_FOLDER = "model"
 
 # Set up logger
 log_format = "%(levelname)s %(asctime)s - %(message)s"
+LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
 logging.basicConfig(stream=sys.stdout,
                     format=log_format,
-                    level=logging.INFO)
+                    level=LOGLEVEL)
+logging.info(f"Using log level {LOGLEVEL}")
 
 # Flask app with database configuration.
 app = Flask('Inference Service')
