@@ -6,5 +6,7 @@ services:
     build:
       context: .
       dockerfile: service/Dockerfile
+    environment:
+      - LOGLEVEL=INFO
     ports:
       - "5000:5000"
