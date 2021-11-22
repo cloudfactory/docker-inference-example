@@ -7,6 +7,9 @@ from PIL import Image
 import numpy as np
 import requests
 
+from service.serving.attr_model import ATTRModel
+from service.serving.cls_model import CLSModel
+from service.serving.od_model import ODModel
 from service.serving.registry import models_registry
 
 
@@ -14,6 +17,8 @@ def get_object_detection_prediction(model_name, image_b64=None, image_url=None,
                                     confidence_thresh=0.5, cls_model_name=None, attr_model_name=None):
     logging.debug(f"Trying to retrieve  object detection predictions for model {model_name}")
     model = models_registry[model_name]
+    if not isinstance(model, ODModel):
+        raise ValueError(f"{model_name} should be of type ODModel, got {type(model)}")
     image = None
     if image_b64:
         logging.debug("Using image provided in base64 format")
@@ -33,6 +38,8 @@ def get_object_detection_prediction(model_name, image_b64=None, image_url=None,
     if cls_model_name and len(predictions) > 0:
         logging.debug(f"Use classifier model to polish classes ({cls_model_name})")
         cls_model = models_registry[cls_model_name]
+        if not isinstance(cls_model, CLSModel):
+            raise ValueError(f"{cls_model_name} should be of type CLSModel, got {type(cls_model)}")
         img_list = [np.array(image.crop(p["bbox"])) for p in predictions]
         cls_predictions = cls_model.predict(img_list)
         logging.debug(f"CLS predictions ({cls_predictions})")
@@ -43,6 +50,8 @@ def get_object_detection_prediction(model_name, image_b64=None, image_url=None,
     if attr_model_name and len(predictions) > 0:
         logging.debug(f"Use attributer model to extract object attribtues ({attr_model_name})")
         attr_model = models_registry[attr_model_name]
+        if not isinstance(attr_model, ATTRModel):
+            raise ValueError(f"{attr_model_name} should be of type ATTRModel, got {type(attr_model)}")
         img_list = [np.array(image.crop(p["bbox"])) for p in predictions]
         attr_predictions = attr_model.predict(img_list)
         logging.debug(f"Attribute predictions ({attr_predictions})")
