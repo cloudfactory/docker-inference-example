@@ -4,6 +4,7 @@ import os
 import sys
 
 import waitress
+import flask
 from flask import Flask
 
 from service.endpoints.inference import inference_api
@@ -12,11 +13,24 @@ from service.serving.registry import models_registry
 C_MODEL_FOLDER = "model"
 
 # Set up logger
-log_format = "%(levelname)s %(asctime)s - %(message)s"
+log_format = "%(levelname)s %(asctime)s %(request_id)s - %(message)s"
 LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
 logging.basicConfig(stream=sys.stdout,
                     format=log_format,
                     level=LOGLEVEL)
+old_factory = logging.getLogRecordFactory()
+
+
+def record_factory(* args, ** kwargs):
+    record = old_factory(* args, ** kwargs)
+    try:
+        record.request_id = flask.g.request_id
+    except Exception as e:
+        record.request_id = ''
+    return record
+
+
+logging.setLogRecordFactory(record_factory)
 logging.info(f"Using log level {LOGLEVEL}")
 
 # Flask app with database configuration.

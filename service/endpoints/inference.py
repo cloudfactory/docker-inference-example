@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, g
 
 from .. import api
 
@@ -9,6 +9,8 @@ inference_api = Blueprint('inference_api', __name__)
 def get_object_detection_prediction():
     confidence_thresh = request.json.get('confidence_threshold', 0.5)
     request_id = request.json.get("request_id")
+    if request_id:
+        g.request_id = request_id
     image = request.json.get('image', {})
     image_b64, image_url = None, None
     if 'b64' in image:
