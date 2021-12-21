@@ -13,8 +13,15 @@ from service.serving.od_model import ODModel
 from service.serving.registry import models_registry
 
 
-def get_object_detection_prediction(model_name, image_b64=None, image_url=None,
-                                    confidence_thresh=0.5, cls_model_name=None, attr_model_name=None):
+def get_object_detection_prediction(
+    model_name,
+    image_b64=None,
+    image_url=None,
+    confidence_thresh=0.5,
+    attr_thresh=0.5,
+    cls_model_name=None,
+    attr_model_name=None,
+):
     logging.debug(f"Trying to retrieve  object detection predictions for model {model_name}")
     model = models_registry[model_name]
     if not isinstance(model, ODModel):
@@ -33,7 +40,7 @@ def get_object_detection_prediction(model_name, image_b64=None, image_url=None,
     if image.mode != 'RGB':
         image = image.convert('RGB')
     logging.debug("Performing inference")
-    predictions = model.predict(image)
+    predictions = model.predict(image, score_threshold=confidence_thresh)
     logging.debug(f"Predictions: {predictions}")
     if cls_model_name and len(predictions) > 0:
         logging.debug(f"Use classifier model to polish classes ({cls_model_name})")
@@ -53,7 +60,7 @@ def get_object_detection_prediction(model_name, image_b64=None, image_url=None,
         if not isinstance(attr_model, ATTRModel):
             raise ValueError(f"{attr_model_name} should be of type ATTRModel, got {type(attr_model)}")
         img_list = [np.array(image.crop(p["bbox"])) for p in predictions]
-        attr_predictions = attr_model.predict(img_list)
+        attr_predictions = attr_model.predict(img_list, score_threshold=attr_thresh)
         logging.debug(f"Attribute predictions ({attr_predictions})")
         for i, pred in enumerate(predictions):
             pred["attributes"] = attr_predictions[i]["attributes"]
