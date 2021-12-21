@@ -8,6 +8,7 @@ inference_api = Blueprint('inference_api', __name__)
 @inference_api.route('/v1/object_detection', methods=['POST'])
 def get_object_detection_prediction():
     confidence_thresh = request.json.get('confidence_threshold', 0.5)
+    attr_thresh = request.json.get('attributer_threshold', 0.5)
     request_id = request.json.get("request_id")
     if request_id:
         g.request_id = request_id
@@ -22,8 +23,15 @@ def get_object_detection_prediction():
     model = request.json.get('model', None)
     cls_model_name = request.json.get('cls_model_name', None)
     attr_model_name = request.json.get('attr_model_name', None)
-    predictions = api.inference.get_object_detection_prediction(model, image_b64, image_url, confidence_thresh,
-                                                                cls_model_name, attr_model_name)
+    predictions = api.inference.get_object_detection_prediction(
+        model,
+        image_b64=image_b64,
+        image_url=image_url,
+        confidence_thresh=confidence_thresh,
+        attr_thresh=attr_thresh,
+        cls_model_name=cls_model_name,
+        attr_model_name=attr_model_name,
+    )
     results = {"predictions": predictions}
     if request_id:
         results["request_id"] = request_id
