@@ -26,7 +26,7 @@ class ATTRModel:
         self.model = model.to(self.device)
         logging.info(f"Model {model_path} loaded")
 
-    def predict(self, images: List[np.array], batch_size=32):
+    def predict(self, images: List[np.array], batch_size: int = 32, score_threshold: float = 0.5):
         images_tensor = []
         for i in images:
             tr_img = self.transforms(image=i)['image']
@@ -39,11 +39,13 @@ class ATTRModel:
             preds = []
             for (batch,) in images_loader:
                 batch = batch.to(self.device)
-                preds = preds + list(torch.softmax(self.model(batch), dim=1).cpu().numpy())
+                preds = preds + list(torch.sigmoid(self.model(batch)).cpu().numpy())
         results = []
         for pred in preds:
             res = {"attributes": {}}
             for i, score in enumerate(pred):
+                if score < score_threshold:
+                    continue
                 attribute_name = self.class_mapping[i]["attribute_name"]
                 attribute_value = self.class_mapping[i]["attribute_value"]
                 if attribute_name not in res["attributes"]:

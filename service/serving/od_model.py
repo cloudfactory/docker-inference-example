@@ -25,7 +25,7 @@ class ODModel:
         self.model = model.to(self.device)
         logging.info(f"Model {model_path} loaded")
 
-    def predict(self, image: Image):
+    def predict(self, image: Image, score_threshold: float = 0.5):
         width, height = image.width, image.height
         image = np.array(image)
         image = self.transforms(image=image)['image']
@@ -36,7 +36,6 @@ class ODModel:
             x = x.permute(2, 0, 1).float()
             y = self.model(x)
             scale_factor = height / x.shape[1]
-            # TODO Add filter by scores
             to_keep = torchvision.ops.nms(y['pred_boxes'], y['scores'], 0.5)
             y['pred_boxes'] = y['pred_boxes'][to_keep]
             y['pred_classes'] = y['pred_classes'][to_keep]
@@ -46,6 +45,8 @@ class ODModel:
         y['scores'] = y['scores'].cpu().numpy()
         results = []
         for i in range(len(y['pred_classes'])):
+            if y['scores'][i] < score_threshold:
+                continue
             bbox = list(map(int, y['pred_boxes'][i] * scale_factor))
             class_idx = y['pred_classes'][i]
             results.append({'bbox': bbox,
