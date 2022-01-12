@@ -10,6 +10,7 @@ import requests
 from service.serving.attr_model import ATTRModel
 from service.serving.cls_model import CLSModel
 from service.serving.od_model import ODModel
+from service.serving.tag_model import TAGModel
 from service.serving.registry import models_registry
 
 
@@ -22,7 +23,7 @@ def get_object_detection_prediction(
     cls_model_name=None,
     attr_model_name=None,
 ):
-    logging.debug(f"Trying to retrieve  object detection predictions for model {model_name}")
+    logging.debug(f"Trying to retrieve object detection predictions for model {model_name}")
     model = models_registry[model_name]
     if not isinstance(model, ODModel):
         raise ValueError(f"{model_name} should be of type ODModel, got {type(model)}")
@@ -65,4 +66,28 @@ def get_object_detection_prediction(
         for i, pred in enumerate(predictions):
             pred["attributes"] = attr_predictions[i]["attributes"]
     logging.debug(f"Response: {predictions}")
+    return predictions
+
+
+def get_image_tagger_prediction(model_name, image_b64=None, image_url=None, confidence_thresh=0.5):
+    logging.debug(f"Trying to retrieve image tag predictions for model {model_name}")
+    model = models_registry[model_name]
+    if not isinstance(model, TAGModel):
+        raise ValueError(f"{model_name} should be of type TAGModel, got {type(model)}")
+    image = None
+    if image_b64:
+        logging.debug("Using image provided in base64 format")
+        image_data = re.sub("^data:image/.+;base64,", "", image_b64)
+        image = Image.open(BytesIO(base64.b64decode(image_data)))
+        logging.debug(f"Image decoded successfully {image.mode} {image.size}")
+    elif image_url:
+        logging.debug("Extracting image by URL")
+        response = requests.get(image_url)
+        image = Image.open(BytesIO(response.content))
+        logging.debug(f"Image extracted successfully {image.mode} {image.size}")
+    if image.mode != "RGB":
+        image = image.convert("RGB")
+    logging.debug("Performing inference")
+    predictions = model.predict([image], batch_size=1, score_threshold=confidence_thresh)
+    logging.debug(f"Tagger predictions: {predictions}")
     return predictions
