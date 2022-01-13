@@ -6,6 +6,7 @@ from omegaconf import OmegaConf
 from .attr_model import ATTRModel
 from .cls_model import CLSModel
 from .od_model import ODModel
+from .tag_model import TAGModel
 
 
 class ModelRegistry:
@@ -20,6 +21,8 @@ class ModelRegistry:
             self.loaded_models[model_name] = CLSModel(model_path)
         elif model_family == "attributer":
             self.loaded_models[model_name] = ATTRModel(model_path)
+        elif model_family == "image-tagger":
+            self.loaded_models[model_name] = TAGModel(model_path)
         else:
             raise ValueError(f"Unsupported model family - {model_family}")
 
