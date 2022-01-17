@@ -63,3 +63,28 @@ def get_image_tagger_prediction():
     if request_id:
         results["request_id"] = request_id
     return api.base.get_json_response(results)
+
+
+@inference_api.route("/v1/semantic_segmentor", methods=["POST"])
+def get_semantic_segmentor_prediction():
+    request_id = request.json.get("request_id")
+    if request_id:
+        g.request_id = request_id
+    image = request.json.get("image", {})
+    image_b64, image_url = None, None
+    if "b64" in image:
+        image_b64 = image.get("b64")
+    if "url" in image:
+        image_url = image.get("url")
+    if not image_b64 and not image_url:
+        raise ValueError("Image url or base64 should be provided")
+    model = request.json.get("model", None)
+    predictions = api.inference.get_semantic_segmentor_prediction(
+        model,
+        image_b64=image_b64,
+        image_url=image_url,
+    )
+    results = {"predictions": predictions}
+    if request_id:
+        results["request_id"] = request_id
+    return api.base.get_json_response(results)
