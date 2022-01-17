@@ -44,13 +44,13 @@ class SESModel:
             mask = np.argmax(y.cpu().numpy(), axis=0).astype(np.uint8)
 
         post_processed_class_preds = []
-        indices = []
+        class_names = []
         bboxes = []
         for class_ind in range(y.shape[0]):
             pred = (mask == class_ind + 1).astype(np.uint8)
             if 1 not in pred:
                 continue
-            indices.append(class_ind)
+            class_names.append(self.class_mapping[class_ind])
             bbox = mask2bbox(pred)
             cropped_pred = pred[bbox[0]: bbox[1], bbox[2]: bbox[3]].copy()
             cropped_pred = rle_encoding(cropped_pred)
@@ -58,7 +58,7 @@ class SESModel:
             bboxes.append([bbox[2], bbox[0], bbox[3], bbox[1]])
 
         results = {
-            "indices": indices,
+            "class_names": class_names,
             "boxes": bboxes,
             "rle_masks": post_processed_class_preds,
         }
