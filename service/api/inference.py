@@ -89,7 +89,7 @@ def get_image_tagger_prediction(model_name, image_b64=None, image_url=None, conf
     if image.mode != "RGB":
         image = image.convert("RGB")
     logging.debug("Performing inference")
-    predictions = model.predict([image], batch_size=1, score_threshold=confidence_thresh)
+    predictions = model.predict([np.array(image)], batch_size=1, score_threshold=confidence_thresh)
     logging.debug(f"Tagger predictions: {predictions}")
     return predictions
 
