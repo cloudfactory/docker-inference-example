@@ -54,25 +54,25 @@ class SESModel:
             y = torch.nn.functional.interpolate(
                 y, size=(height, width), mode="bilinear", align_corners=False
             )[0]
-            mask = np.argmax(y.cpu().numpy(), axis=0).astype(np.uint8)
+            y = y.cpu().numpy()
+            mask = np.argmax(y, axis=0).astype(np.uint8)
 
-        post_processed_class_preds = []
-        class_names = []
-        bboxes = []
+        results = []
         for class_ind in range(y.shape[0]):
             pred = (mask == class_ind + 1).astype(np.uint8)
             if 1 not in pred:
                 continue
-            class_names.append(self.class_mapping[class_ind])
             bbox = mask2bbox(pred)
             cropped_pred = pred[bbox[0]: bbox[1], bbox[2]: bbox[3]].copy()
             cropped_pred = rle_encoding(cropped_pred)
-            post_processed_class_preds.append(cropped_pred)
-            bboxes.append([bbox[2], bbox[0], bbox[3], bbox[1]])
-
-        results = {
-            "class_names": class_names,
-            "boxes": bboxes,
-            "rle_masks": post_processed_class_preds,
-        }
+            score = np.max(y[class_ind + 1] * pred)
+            results.append(
+                {
+                    "bbox": [bbox[2], bbox[0], bbox[3], bbox[1]],
+                    "rle_masks": cropped_pred,
+                    "class_idx": class_ind,
+                    "class_name": self.class_mapping[class_ind],
+                    "score": 1 / (1 + np.exp(-score)),
+                }
+            )
         return results
