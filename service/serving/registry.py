@@ -5,6 +5,7 @@ from omegaconf import OmegaConf
 
 from .attr_model import ATTRModel
 from .cls_model import CLSModel
+from .is_model import ISModel
 from .od_model import ODModel
 from .ses_model import SESModel
 from .tag_model import TAGModel
@@ -24,6 +25,8 @@ class ModelRegistry:
             self.loaded_models[model_name] = ATTRModel(model_path)
         elif model_family == "image-tagger":
             self.loaded_models[model_name] = TAGModel(model_path)
+        elif model_family == "segmentor":
+            self.loaded_models[model_name] = ISModel(model_path)
         elif model_family == "semantic-segmentor":
             self.loaded_models[model_name] = SESModel(model_path)
         else:
