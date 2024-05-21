@@ -10,7 +10,7 @@ Flask = "==1.1.2"
 Flask-Uploads = "==0.2.1"
 flask-swagger = "==0.2.14"
 omegaconf = "==2.1.1"
-requests = "==2.25.1"
+requests = "==2.32.0"
 waitress = "==2.0.0"
 
 [requires]
